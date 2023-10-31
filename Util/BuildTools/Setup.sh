@@ -128,7 +128,7 @@ for PY_VERSION in ${PY_VERSION_LIST[@]} ; do
 
   SHOULD_BUILD_BOOST=true
   PYTHON_VERSION=$(/usr/bin/env python${PY_VERSION} -V 2>&1)
-  LIB_NAME=${PYTHON_VERSION:7:3}
+  LIB_NAME=${PYTHON_VERSION:7:4}
   LIB_NAME=${LIB_NAME//.}
   if [[ -d "${BOOST_BASENAME}-install" ]] ; then
     if [ -f "${BOOST_BASENAME}-install/lib/libboost_python${LIB_NAME}.a" ] ; then
@@ -331,7 +331,67 @@ unset GTEST_BASENAME
 # -- Get Recast&Detour and compile it with libc++ ------------------------------
 # ==============================================================================
 
-RECAST_BASENAME=recast-${CXX_TAG}
+# RECAST_BASENAME=recast-${CXX_TAG}
+
+# RECAST_INCLUDE=${PWD}/${RECAST_BASENAME}-install/include
+# RECAST_LIBPATH=${PWD}/${RECAST_BASENAME}-install/lib
+
+# if [[ -d "${RECAST_BASENAME}-install" &&
+#       -f "${RECAST_BASENAME}-install/bin/RecastBuilder" ]] ; then
+#   log "${RECAST_BASENAME} already installed."
+# else
+#   rm -Rf \
+#       ${RECAST_BASENAME}-source \
+#       ${RECAST_BASENAME}-build \
+#       ${RECAST_BASENAME}-install
+
+#   log "Retrieving Recast & Detour"
+
+#   git clone https://github.com/carla-simulator/recastnavigation.git ${RECAST_BASENAME}-source
+
+#   pushd ${RECAST_BASENAME}-source >/dev/null
+
+#   git checkout carla
+
+#   popd >/dev/null
+
+#   log "Building Recast & Detour with libc++."
+
+#   mkdir -p ${RECAST_BASENAME}-build
+
+#   pushd ${RECAST_BASENAME}-build >/dev/null
+
+#   cmake -G "Ninja" \
+#       -DCMAKE_CXX_FLAGS="-std=c++14 -fPIC" \
+#       -DCMAKE_INSTALL_PREFIX="../${RECAST_BASENAME}-install" \
+#       -DRECASTNAVIGATION_DEMO=False \
+#       -DRECASTNAVIGATION_TEST=False \
+#       ../${RECAST_BASENAME}-source
+
+#   ninja
+
+#   ninja install
+
+#   popd >/dev/null
+
+#   rm -Rf ${RECAST_BASENAME}-source ${RECAST_BASENAME}-build
+
+#   # move headers inside 'recast' folder
+#   mkdir -p "${PWD}/${RECAST_BASENAME}-install/include/recast"
+#   mv "${PWD}/${RECAST_BASENAME}-install/include/"*h "${PWD}/${RECAST_BASENAME}-install/include/recast/"
+
+# fi
+
+# # make sure the RecastBuilder is corrctly copied
+# RECAST_INSTALL_DIR="${CARLA_BUILD_FOLDER}/../Util/DockerUtils/dist"
+# if [[ ! -f "${RECAST_INSTALL_DIR}/RecastBuilder" ]]; then
+#   cp "${RECAST_BASENAME}-install/bin/RecastBuilder" "${RECAST_INSTALL_DIR}/"
+# fi
+
+
+RECAST_HASH=0b13b0
+RECAST_COMMIT=0b13b0d288ac96fdc5347ee38299511c6e9400db
+RECAST_BASENAME=recast-${RECAST_HASH}-${CXX_TAG}
 
 RECAST_INCLUDE=${PWD}/${RECAST_BASENAME}-install/include
 RECAST_LIBPATH=${PWD}/${RECAST_BASENAME}-install/lib
@@ -351,7 +411,7 @@ else
 
   pushd ${RECAST_BASENAME}-source >/dev/null
 
-  git checkout carla
+  git reset --hard ${RECAST_COMMIT}
 
   popd >/dev/null
 
@@ -387,6 +447,7 @@ RECAST_INSTALL_DIR="${CARLA_BUILD_FOLDER}/../Util/DockerUtils/dist"
 if [[ ! -f "${RECAST_INSTALL_DIR}/RecastBuilder" ]]; then
   cp "${RECAST_BASENAME}-install/bin/RecastBuilder" "${RECAST_INSTALL_DIR}/"
 fi
+
 
 unset RECAST_BASENAME
 
